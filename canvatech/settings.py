@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-w+sv3()di-^)4!^u6=8#r$!4j3x4x_w$x35x$!i7fio^ol4jk&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["canvatech-web.onrender.com",
+    "canvatech.in",
+    "www.canvatech.in",]
 
 
 # Application definition
