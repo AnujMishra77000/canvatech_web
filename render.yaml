@@ -8,6 +8,5 @@ services:
       python manage.py migrate
     startCommand: gunicorn project.wsgi:application
     envVars:
-      - key: DEBUG
-        value: False
+    plan: free
 
