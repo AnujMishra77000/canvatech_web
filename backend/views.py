@@ -1,7 +1,10 @@
+import logging
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Consultation
+
+logger = logging.getLogger(__name__)
 
 def consultation_view(request):
     if request.method == "POST":
@@ -20,9 +23,10 @@ def consultation_view(request):
         )
 
         # 📩 ADMIN MAIL
-        send_mail(
-            "New Consultation Request",
-            f"""
+        try:
+            send_mail(
+                "New Consultation Request",
+                f"""
 Name: {consultation.full_name}
 Company: {consultation.company}
 Email: {consultation.email}
@@ -30,16 +34,19 @@ Phone: {consultation.contact_number}
 
 Business Details:
 {consultation.business_details}
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            ["canvatech.info@gmail.com"],
-            fail_silently=False,
-        )
+                """,
+                settings.DEFAULT_FROM_EMAIL,
+                ["canvatech.info@gmail.com"],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error(f"Admin email failed: {e}")
 
-        # 📩 USER WELCOME MAIL
-        send_mail(
-            "Thanks for contacting Canvatech",
-            f"""
+        # 📩 USER MAIL
+        try:
+            send_mail(
+                "Thanks for contacting Canvatech",
+                f"""
 Hi {consultation.full_name},
 
 Thank you for reaching out!
@@ -47,12 +54,14 @@ Thank you for reaching out!
 We’ve received your consultation request and will contact you within 24 hours.
 
 Regards,
-Canvatech Team.
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            [consultation.email],
-            fail_silently=False,
-        )
+Canvatech Team
+                """,
+                settings.DEFAULT_FROM_EMAIL,
+                [consultation.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error(f"User email failed: {e}")
 
         return redirect("/?success=1")
 
