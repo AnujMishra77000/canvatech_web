@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
-from django.core.mail import send_mail
-from django.conf import settings
 from .models import Consultation
+import resend
+from canvatech import  settings
+
+resend.api_key = settings.RESEND_API_KEY
 
 def consultation_view(request):
     if request.method == "POST":
@@ -20,39 +22,31 @@ def consultation_view(request):
         )
 
         # 📩 ADMIN MAIL
-        send_mail(
-            "New Consultation Request",
-            f"""
-Name: {consultation.full_name}
-Company: {consultation.company}
-Email: {consultation.email}
-Phone: {consultation.contact_number}
-
-Business Details:
-{consultation.business_details}
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            ["canvatech.info@gmail.com"],
-            fail_silently=False,
-        )
+        resend.Emails.send({
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": ["canvatech.info@gmail.com"],
+            "subject": "New Consultation Request",
+            "html": f"""
+<p><b>Name:</b> {consultation.full_name}</p>
+<p><b>Company:</b> {consultation.company}</p>
+<p><b>Email:</b> {consultation.email}</p>
+<p><b>Phone:</b> {consultation.contact_number}</p>
+<p><b>Business Details:</b><br>{consultation.business_details}</p>
+"""
+        })
 
         # 📩 USER WELCOME MAIL
-        send_mail(
-            "Thanks for contacting Canvatech",
-            f"""
-Hi {consultation.full_name},
-
-Thank you for reaching out!
-
-We’ve received your consultation request and will contact you within 24 hours.
-
-Regards,
-Canvatech Team.
-            """,
-            settings.DEFAULT_FROM_EMAIL,
-            [consultation.email],
-            fail_silently=False,
-        )
+        resend.Emails.send({
+            "from": settings.RESEND_FROM_EMAIL,
+            "to": [consultation.email],
+            "subject": "Thanks for contacting Canvatech",
+            "html": f"""
+<p>Hi {consultation.full_name},</p>
+<p>Thank you for reaching out!</p>
+<p>We’ve received your consultation request and will contact you within 24 hours.</p>
+<p>Regards,<br>Canvatech Team</p>
+"""
+        })
 
         return redirect("/?success=1")
 
