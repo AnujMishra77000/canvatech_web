@@ -155,26 +155,16 @@ STATICFILES_DIRS = [
     BASE_DIR / "backend/static", 
 ]
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-pg_host = os.environ.get("PGHOST")
-pg_db = os.environ.get("PGDATABASE")
-pg_user = os.environ.get("PGUSER")
-pg_pass = os.environ.get("PGPASSWORD")
-pg_sslmode = os.environ.get("PGSSLMODE", "require")
-pg_channel_binding = os.environ.get("PGCHANNELBINDING", "require")
-
-DATABASE_URL = f"postgresql://{pg_user}:{pg_pass}@{pg_host}:5432/{pg_db}?sslmode={pg_sslmode}&channel_binding={pg_channel_binding}"
-
-# -----------------------------
-# Decode if accidentally bytes (safe)
-# -----------------------------
-if isinstance(DATABASE_URL, bytes):
-    DATABASE_URL = DATABASE_URL.decode("utf-8")
-
-# -----------------------------
-# Parse with dj-database-url
-# -----------------------------
 DATABASES = {
-    "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("PGDATABASE"),
+        "USER": os.getenv("PGUSER"),
+        "PASSWORD": os.getenv("PGPASSWORD"),
+        "HOST": os.getenv("PGHOST"),
+        "PORT": "5432",
+        "OPTIONS": {
+            "sslmode": os.getenv("PGSSLMODE", "require"),
+        },
+    }
 }
